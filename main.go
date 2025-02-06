@@ -3,26 +3,21 @@ package main
 import (
 	"birdton/configurations"
 	"birdton/handlers"
+	"birdton/services"
 	"net/http"
-
-	"github.com/kkdai/twitter"
 )
 
 func main() {
 
 	config := configurations.GetConfiguration()
 
-	xClient := twitter.NewServerClient(config.ConsumerKey, config.ConsumerSecret)
+	xService := services.NewTwitterService(config.TwitterToken)
 
-	client := handlers.NewServerClient(xClient, config)
+	handler := handlers.NewServerHandler(xService)
 
-	http.HandleFunc("/maketoken", client.GetTwitterToken)
-	http.HandleFunc("/request", client.RedirectUserToTwitter)
-	http.HandleFunc("/follow", client.GetFollower)
-	http.HandleFunc("/followids", client.GetFollowerIDs)
-	http.HandleFunc("/time", client.GetTimeLine)
-	http.HandleFunc("/user", client.GetUserDetail)
+	http.HandleFunc("/following", handler.GetFollowersUserId)
+	http.HandleFunc("/is_following", handler.GetFolowingCheck)
 
-	http.ListenAndServe(config.ServeAddr, nil)
+	http.ListenAndServe(config.HostAddr, nil)
 
 }
